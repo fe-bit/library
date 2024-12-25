@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Paper List</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Authors</th>
+                <th>Year</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paper in object_list %}
+            <tr>
+                <td><a href="{% url 'paper_detail' paper.pk %}">{{ paper.title }}</a></td>
+                <td>{{ paper.authors }}</td>
+                <td>{{ paper.year }}</td>
+                <td>
+                    <a href="{% url 'paper_edit' paper.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="{% url 'paper_delete' paper.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'paper_create' %}" class="btn btn-success">Add new paper</a>
+</div>
+{% endblock %}

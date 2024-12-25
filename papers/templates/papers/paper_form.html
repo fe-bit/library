@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Paper</h1>
+    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+        </div>
+        <div class="mb-3">
+            {{ form.authors.label_tag }}
+            {{ form.authors }}
+        </div>
+        <div class="mb-3">
+            {{ form.file.label_tag }}
+            {{ form.file }}
+        </div>
+        <div class="mb-3">
+            {{ form.year.label_tag }}
+            {{ form.year }}
+        </div>
+        <div class="mb-3">
+            {{ form.url.label_tag }}
+            {{ form.url }}
+        </div>
+        <div class="mb-3">
+            {{ form.further_information.label_tag }}
+            {{ form.further_information }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'paper_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

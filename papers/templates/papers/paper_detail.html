@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ paper.title }}</h1>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Authors:</strong> {{ paper.authors }}</p>
+            <p><strong>Year:</strong> {{ paper.year }}</p>
+            <p><strong>URL:</strong> <a href="{{ paper.url }}">{{ paper.url }}</a></p>
+            <p><strong>Further Information:</strong> {{ paper.further_information }}</p>
+            {% if paper.file %}
+            <p><a href="{{ paper.file.url }}" class="btn btn-primary">Download File</a></p>
+            {% endif %}
+            <a href="{% url 'paper_edit' paper.pk %}" class="btn btn-warning">Edit</a>
+            <a href="{% url 'paper_delete' paper.pk %}" class="btn btn-danger">Delete</a>
+            <a href="{% url 'paper_list' %}" class="btn btn-secondary">Back to list</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

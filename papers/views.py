@@ -3,6 +3,9 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from .models import Paper
 from django.db.models import Q
 from .search.haystack_search import HaystackSearch
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
 hs = HaystackSearch()
 
@@ -62,3 +65,23 @@ class PaperSearchView(ListView):
         context = super().get_context_data(**kwargs)
         context['query'] = self.request.GET.get('q', '')
         return context
+    
+
+
+
+class AskQuestionView(APIView):
+    def post(self, request, *args, **kwargs):
+        question = request.data.get('question')
+        paper_id = request.data.get("paper", None)
+        if paper_id:
+            paper = Paper.objects.get(id=paper_id)
+            answer = hs.ask_question_about_paper(question, paper)
+        else:
+            answer = hs.ask_question_about_paper(question)
+
+        response_data = {
+            'question': question,
+            'answer': answer,
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)

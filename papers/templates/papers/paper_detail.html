@@ -14,6 +14,9 @@
                     <button class="nav-link" id="ai-summary-tab" data-bs-toggle="tab" data-bs-target="#ai-summary" type="button" role="tab" aria-controls="ai-summary" aria-selected="false">AI Summary</button>
                 </li>
                 {% endif %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="ask-question-tab" data-bs-toggle="tab" data-bs-target="#ask-question" type="button" role="tab" aria-controls="ask-question" aria-selected="false">Ask a Question</button>
+                </li>
             </ul>
             <div class="tab-content" id="paperTabContent">
                 <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
@@ -33,8 +36,73 @@
                     <p><strong>AI Summary:</strong> {{ paper.ai_summary|markdown_to_html|safe }}</p>
                 </div>
                 {% endif %}
+                <div class="tab-pane fade" id="ask-question" role="tabpanel" aria-labelledby="ask-question-tab">
+                    <div id="chat-view" class="mb-3" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
+                        <!-- Chat messages will be appended here -->
+                    </div>
+                    <form id="question-form">
+                        <div class="mb-3">
+                            <label for="question" class="form-label">Your Question</label>
+                            <textarea class="form-control" id="question" rows="3" placeholder="Ask a question about this paper..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                    <div id="loading-spinner" class="mt-3" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Include marked.js library -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+document.getElementById('question-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var question = document.getElementById('question').value;
+    var paperId = {{ paper.pk }};
+    document.getElementById('loading-spinner').style.display = 'block';
+
+    // Add the question to the chat view
+    var chatView = document.getElementById('chat-view');
+    var questionElement = document.createElement('div');
+    questionElement.classList.add('mb-2');
+    questionElement.innerHTML = '<strong>You:</strong> ' + question;
+    chatView.appendChild(questionElement);
+
+    fetch('{% url "ask_question_api" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ question: question, paper: paperId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('loading-spinner').style.display = 'none';
+
+        // Convert markdown response to HTML
+        var responseHtml = marked.parse(data.answer);
+
+        // Add the response to the chat view
+        var responseElement = document.createElement('div');
+        responseElement.classList.add('mb-2');
+        responseElement.innerHTML = '<strong>Bot:</strong> ' + responseHtml;
+        chatView.appendChild(responseElement);
+
+        // Clear the question textarea
+        document.getElementById('question').value = '';
+    })
+    .catch(error => {
+        document.getElementById('loading-spinner').style.display = 'none';
+        console.error('Error:', error);
+    });
+});
+</script>
 {% endblock %}

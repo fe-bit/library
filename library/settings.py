@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     "papers.apps.PapersConfig", # Add the papers app to the list of installed apps
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

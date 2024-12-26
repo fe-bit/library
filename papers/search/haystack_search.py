@@ -5,6 +5,8 @@ from .indexing_pipeline import IndexingPipeline
 from .hybrid_search_pipeline import HybridSearchPipeline
 from .ai_summary_pipeline import AiSearchPaperSummaryPipeline
 from .ai_paper_summary_pipeline import AiPaperSummaryPipeline
+from .paper_qa_pipeline import PaperQAPipeline
+
 
 HAYSTACK_TELEMETRY_ENABLED = "False"
 
@@ -15,6 +17,8 @@ class HaystackSearch:
         self.hybrid_search_pipeline = HybridSearchPipeline(self.document_store)
         self.ai_summary_pipeline = AiSearchPaperSummaryPipeline(self.document_store)
         self.ai_paper_summary_pipeline = AiPaperSummaryPipeline(self.document_store)
+        self.paper_qa_pipeline = PaperQAPipeline(self.document_store)
+
         print(self.document_store.count_documents())
 
     def add_or_update_papers(self, papers:list[Paper]):
@@ -68,3 +72,7 @@ class HaystackSearch:
         # for p in final_result:
         #     p.ai_search_summary = self.ai_summary_pipeline.run(query, p.documents)
         return final_result
+
+    def ask_question_about_paper(self, question:str, paper:Paper|None = None):
+        return self.paper_qa_pipeline.run(question, paper)
+    

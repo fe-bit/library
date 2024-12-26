@@ -16,23 +16,76 @@
                 <th>Authors</th>
                 <th>Year</th>
                 <th>AI Summary</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for paper in papers %}
             <tr>
-                <td><a href="{% url 'paper_detail' paper.pk %}">{{ paper.title }}</a></td>
-                <td>{{ paper.authors }}</td>
+                <td><a href="{% url 'paper_detail' paper.pk %}">{{ paper.title|highlight:query|safe }}</a></td>
+                <td>{{ paper.authors|highlight:query|safe }}</td>
                 <td>{{ paper.year }}</td>
-                <td>{{paper.ai_summary|markdown_to_html|highlight:query|safe}}</td>
+                <td>
+                    <div id="summary-short-{{ paper.pk }}">
+                        {{ paper.ai_summary|truncatewords:50|highlight:query|safe }}
+                        {% if paper.ai_summary|length > 50 %}
+                        <a href="javascript:void(0);" onclick="toggleSummary({{ paper.pk }});" class="text-primary">Read More</a>
+                        {% endif %}
+                    </div>
+                    <div id="summary-full-{{ paper.pk }}" style="display: none;">
+                        {{ paper.ai_summary|markdown_to_html|highlight:query|safe }}
+                        <a href="javascript:void(0);" onclick="toggleSummary({{ paper.pk }});" class="text-primary">Show Less</a>
+                    </div>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#contentModal{{ paper.pk }}">
+                        View Content
+                    </button>
+                </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="4">No papers found.</td>
+                <td colspan="5">No papers found.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     <a href="{% url 'paper_list' %}" class="btn btn-secondary">Back to list</a>
 </div>
+
+{% for paper in papers %}
+<!-- Modal -->
+<div class="modal fade" id="contentModal{{ paper.pk }}" tabindex="-1" aria-labelledby="contentModalLabel{{ paper.pk }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contentModalLabel{{ paper.pk }}">{{ paper.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% for line in paper.content %}
+                    <p>{{ line|highlight:query|safe }}</p>
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+function toggleSummary(paperId) {
+    var shortSummary = document.getElementById('summary-short-' + paperId);
+    var fullSummary = document.getElementById('summary-full-' + paperId);
+    if (shortSummary.style.display === 'none') {
+        shortSummary.style.display = 'block';
+        fullSummary.style.display = 'none';
+    } else {
+        shortSummary.style.display = 'none';
+        fullSummary.style.display = 'block';
+    }
+}
+</script>
 {% endblock %}

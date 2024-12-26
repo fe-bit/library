@@ -8,6 +8,7 @@ class Paper(models.Model):
     year = models.IntegerField()
     url = models.URLField(blank=True, null=True)
     further_information = models.TextField(blank=True, null=True)
+    ai_summary = models.CharField(max_length=1000, blank=True, null=True)  # New field for AI summary
 
     def __str__(self):
         return f"{self.title} ({self.year}) - {self.authors}"

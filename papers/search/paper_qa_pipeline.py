@@ -5,6 +5,7 @@ from haystack_integrations.components.generators.google_ai import GoogleAIGemini
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack.components.embedders import SentenceTransformersTextEmbedder
 from haystack.components.retrievers.in_memory import InMemoryEmbeddingRetriever
+import os
 
 
 template = """
@@ -25,7 +26,7 @@ class PaperQAPipeline:
         self.pipe.add_component("embedder", SentenceTransformersTextEmbedder())
         self.pipe.add_component("retriever", InMemoryEmbeddingRetriever(document_store=document_store))
         self.pipe.add_component("prompt_builder", PromptBuilder(template=template))
-        self.pipe.add_component("gemini", GoogleAIGeminiGenerator(model="gemini-1.5-flash"))
+        self.pipe.add_component("gemini", GoogleAIGeminiGenerator(model=os.environ.get("GOOGLE_GEMINI_MODEL")))
         
         self.pipe.connect("embedder.embedding", "retriever.query_embedding")
         self.pipe.connect("retriever", "prompt_builder.documents")

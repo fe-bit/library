@@ -60,6 +60,9 @@ python manage.py runserver
 7. Access the application at http://127.0.0.1:8000/.
 
 # Usage
+## Specify Environment Variables in .env
+1. GOOGLE_API_KEY: Your Google API Key to access gemini API
+2. GOOGLE_GEMINI_MODEL: e.g., "gemini-1.5-flash-8b"
 ## Uploading Papers
 1. Log in to the admin panel at http://127.0.0.1:8000/admin/.
 2. Add a new paper by filling in the required fields and uploading a PDF file.

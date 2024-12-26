@@ -34,26 +34,26 @@ source env/bin/activate  # On Windows use `env\Scripts\activate`
 
 3. Install the required packages:
 
-````ssh
+```ssh
 pip install -r requirements.txt
 ```
 
 4. Set up the database:
 
-````ssh
+```ssh
 python manage.py makemigrations
 python manage.py migrate
 ```
 
 5. Create a superuser:
 
-````ssh
+```ssh
 python manage.py createsuperuser
 ```
 
 6. Run the development server:
 
-````ssh
+```ssh
 python manage.py runserver
 ```
 

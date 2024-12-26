@@ -2,7 +2,9 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Paper
 from django.db.models import Q
+from .search.haystack_search import HaystackSearch
 
+hs = HaystackSearch()
 
 class PaperListView(ListView):
     model = Paper
@@ -17,6 +19,11 @@ class PaperCreateView(CreateView):
     template_name = 'papers/paper_form.html'
     fields = ['title', 'authors', 'file', 'year', 'url', 'further_information']
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        hs.add_or_update_papers(self.object)  # Add the new paper to the search index
+        return response
+    
     def get_success_url(self):
         return reverse('paper_detail', kwargs={'pk': self.object.pk})
 
@@ -42,6 +49,7 @@ class PaperSearchView(ListView):
     def get_queryset(self):
         query = self.request.GET.get('q')
         if query:
+            return hs.search(query)
             return Paper.objects.filter(
                 Q(title__icontains=query) |
                 Q(authors__icontains=query) |

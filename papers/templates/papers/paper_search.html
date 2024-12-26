@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load highlight %}
 {% block content %}
 <div class="container mt-4">
     <h1 class="mb-4">Search Results</h1>
@@ -15,6 +15,7 @@
                 <th>Title</th>
                 <th>Authors</th>
                 <th>Year</th>
+                <th>Content</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -24,6 +25,10 @@
                 <td><a href="{% url 'paper_detail' paper.pk %}">{{ paper.title }}</a></td>
                 <td>{{ paper.authors }}</td>
                 <td>{{ paper.year }}</td>
+                <td>{% for line in paper.content %}
+                    ...{{ line|highlight:query|safe }}...<br><br>
+                    {% endfor %}
+                </td>
                 <td>
                     <a href="{% url 'paper_edit' paper.pk %}" class="btn btn-sm btn-primary">Edit</a>
                     <a href="{% url 'paper_delete' paper.pk %}" class="btn btn-sm btn-danger">Delete</a>

@@ -16,25 +16,24 @@ from haystack.components.routers import FileTypeRouter
 import os
 from ..models import Paper
 from haystack.components.converters import MarkdownToDocument, PyPDFToDocument, TextFileToDocument
-
-from dataclasses import dataclass
-
-@dataclass
-class PaperSearch:
-    title: str
-    authors: str
-    year: int
-    url: str
-    further_information: str
-    content: str
-    pk: int
+from haystack.components.builders import PromptBuilder
+from haystack_integrations.components.generators.google_ai import GoogleAIGeminiGenerator
 
 HAYSTACK_TELEMETRY_ENABLED = "False"
 
 # MODEL_PATH = "sentence-transformers/all-mpnet-base-v2"
 MODEL_SIM_RANKER = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
+template = """
+Given the query, summarize the following information and add additional information only if necessary.
 
+Context: 
+{% for document in documents %}
+    {{ document.content }}
+{% endfor %}
+
+Query: {{ query }}
+"""
 
 class HaystackSearch:
     def __init__(self) -> None:
@@ -118,6 +117,11 @@ class HaystackSearch:
         self.document_ranker_pipeline.connect("bm25_retriever", "document_joiner")
         self.document_ranker_pipeline.connect("embedding_retriever", "document_joiner")
         self.document_ranker_pipeline.connect("document_joiner", "ranker")
+        
+        self.summarizer_pipe = Pipeline()
+        self.summarizer_pipe.add_component("prompt_builder", PromptBuilder(template=template))
+        self.summarizer_pipe.add_component("gemini", GoogleAIGeminiGenerator(model="gemini-pro"))
+        self.summarizer_pipe.connect("prompt_builder", "gemini")
 
         print(self.document_store.count_documents())
 
@@ -184,20 +188,24 @@ class HaystackSearch:
             if doc_id not in paper_id2obj:
                 continue
             paper = paper_id2obj[doc_id]
-            # paper_search = PaperSearch(
-            #     title=paper.title,
-            #     authors=paper.authors,
-            #     year=paper.year,
-            #     url=paper.url,
-            #     further_information=paper.further_information,
-            #     content=doc.content,
-            #     pk=paper.pk
-            # )
             if hasattr(paper, "content"):
                 paper.content.append(doc.content)
+                paper.documents.append(doc)
             else:
                 paper.content = [doc.content]
+                paper.documents = [doc]
+
             if paper not in final_result:
                 final_result.append(paper)
+
+        for p in final_result:
+            res = self.summarizer_pipe.run({
+                "prompt_builder": {
+                    "documents": p.documents,
+                    "query": query
+                }
+            })
+            p.ai_summary = "\n".join(res["gemini"]["replies"])
+
         print(final_result)
         return final_result

@@ -1,36 +1,76 @@
 {% extends "base.html" %}
-
+{% load add_class %}
 {% block content %}
 <div class="container mt-4">
     <h1 class="mb-4">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Paper</h1>
     <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
         <div class="mb-3">
-            {{ form.title.label_tag }}
-            {{ form.title }}
+            <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+            {{ form.title|add_class:"form-control" }}
+            <div class="invalid-feedback">
+                Please provide a valid title.
+            </div>
         </div>
         <div class="mb-3">
-            {{ form.authors.label_tag }}
-            {{ form.authors }}
+            <label for="{{ form.authors.id_for_label }}" class="form-label">{{ form.authors.label }}</label>
+            {{ form.authors|add_class:"form-control" }}
+            <div class="invalid-feedback">
+                Please provide the authors.
+            </div>
         </div>
         <div class="mb-3">
-            {{ form.file.label_tag }}
-            {{ form.file }}
+            <label for="{{ form.file.id_for_label }}" class="form-label">{{ form.file.label }}</label>
+            {{ form.file|add_class:"form-control" }}
+            <div class="invalid-feedback">
+                Please upload a valid file.
+            </div>
         </div>
         <div class="mb-3">
-            {{ form.year.label_tag }}
-            {{ form.year }}
+            <label for="{{ form.year.id_for_label }}" class="form-label">{{ form.year.label }}</label>
+            {{ form.year|add_class:"form-control" }}
+            <div class="invalid-feedback">
+                Please provide a valid year.
+            </div>
         </div>
         <div class="mb-3">
-            {{ form.url.label_tag }}
-            {{ form.url }}
+            <label for="{{ form.url.id_for_label }}" class="form-label">{{ form.url.label }}</label>
+            {{ form.url|add_class:"form-control" }}
+            <div class="invalid-feedback">
+                Please provide a valid URL.
+            </div>
         </div>
         <div class="mb-3">
-            {{ form.further_information.label_tag }}
-            {{ form.further_information }}
+            <label for="{{ form.further_information.id_for_label }}" class="form-label">{{ form.further_information.label }}</label>
+            {{ form.further_information|add_class:"form-control" }}
+            <div class="invalid-feedback">
+                Please provide further information.
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
         <a href="{% url 'paper_list' %}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
+
+<script>
+(function () {
+    'use strict'
+
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.querySelectorAll('.needs-validation')
+
+    // Loop over them and prevent submission
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+</script>
 {% endblock %}
